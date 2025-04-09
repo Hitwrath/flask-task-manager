@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Tasks</title>
+    <style>
+      #add-task-row{
+        display: none;
+      }
+    </style>
+    <script>
+      function showAddRow(){
+        document.getElementById('add-task-row').style.display = 'table-row';
+      }
+      function discardRow(){
+        document.getElementById('add-task-form').reset();
+        document.getElementById('add-task-row').style.display='none';
+      }
+    </script>
+</head>
+<body>
+    <h1>Welcome {{user_name}} to Your Task Manager</h1>
+    <h3>Your Tasks:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        {% if edit_task_id == task.id%}
+        <form method="POST" action="{{ url_for('update_task', task_id=task.id) }}">
+          <tr>
+            <td><input type="text" name="title" value="{{ task.title }}" required></td>
+            <td><input type="text" name="description" value="{{ task.description }}"></td>
+            <td><input type="date" name="due_date" value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date }}"></td>
+            <td>{{ '✅' if task.is_completed else '❌' }}</td>
+            <td>
+              <button type="submit">Save</button>
+              <a href="{{ url_for('my_tasks') }}"><button type="button">Cancel</button></a>
+            </td>
+          </tr>
+          </form>
+        {% else %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td>{{ task.description }}</td>
+          <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '—' }}</td>
+          <td>
+            <form method="POST" action="{{url_for('toggle_task',task_id = task.id)}}">
+              <input type="checkbox" name="is_completed" onchange="this.form.submit()" {% if task.is_completed%}checked{%endif%}>
+            </form>
+          </td>
+          <td>
+            
+            <a href="{{ url_for('my_tasks', edit=task.id) }}">Edit</a>
+          
+            <a href="{{ url_for('delete_task', task_id=task.id) }}">Delete</a>
+            
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      
+        <tr id="'add-task-row">
+          <form method="POST" action="{{url_for('add_task')}}" id="'add-task-form">
+            <td><input type="text" name="title" required></td>
+            <td><input type="text" name='description'></td>
+            <td><input type='date' name='due_date'></td>
+            <td>-</td>
+            <td>
+              <button type="'submit">save</button>
+              <button type="button" onclick="discardRow()">Discard</button>
+            </td>
+          </form>
+        </tr>
+      </tbody>
+    </table>
+
+    <button onclick="showAddRow()">(+)</button>
+    <br><br>
+    <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+</body>
+</html>
